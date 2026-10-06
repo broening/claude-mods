@@ -1,0 +1,34 @@
+name: Mods pruefen
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Claude Code installieren
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Marktplatz pruefen
+        run: claude plugin validate .
+
+      - name: Jeden Mod pruefen
+        run: |
+          status=0
+          for dir in */; do
+            [ -f "$dir.claude-plugin/plugin.json" ] || continue
+            echo "::group::$dir"
+            claude plugin validate "$dir" || status=1
+            echo "::endgroup::"
+          done
+          exit $status

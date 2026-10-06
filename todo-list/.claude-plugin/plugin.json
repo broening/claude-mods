@@ -1,0 +1,7 @@
+{
+  "name": "todo-list",
+  "version": "0.2.1",
+  "description": "Arbeitsliste im Seitenfenster (/todo): Aufgaben einreihen, ohne Claude zu unterbrechen; mit Auto arbeitet Claude sie nacheinander ab (z.B. ueber Nacht); Erledigtes bleibt sichtbar",
+  "author": { "name": "Dan Enso" },
+  "types": "./types/index.d.ts"
+}

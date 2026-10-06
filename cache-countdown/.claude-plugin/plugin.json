@@ -1,0 +1,7 @@
+{
+  "name": "cache-countdown",
+  "version": "0.2.0",
+  "description": "Zeigt ueber dem Prompt, wie lange der Prompt-Cache noch warm ist, mit Compact-Knopf und Auto-Compact kurz vor kalt",
+  "author": { "name": "Dan Enso" },
+  "types": "./types/index.d.ts"
+}

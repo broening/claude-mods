@@ -1,0 +1,7 @@
+{
+  "name": "blast-radius",
+  "version": "0.2.0",
+  "description": "Faengt gefaehrliche Shell-Befehle (Bash und PowerShell) ab, zeigt Befehl und Folge und fragt vor dem Ausfuehren nach; Standard aus, mit /ward fuer die Sitzung einschalten",
+  "author": { "name": "Dan Enso" },
+  "types": "./types/index.d.ts"
+}

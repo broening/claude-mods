@@ -1,0 +1,7 @@
+{
+  "name": "next-steps",
+  "version": "0.1.1",
+  "description": "Schlaegt nach jeder fertigen Antwort drei naechste Schritte vor (Band ueber dem Eingabefeld); ein Klick schickt den Schritt als Prompt. Ein/Aus-Schalter, Neu-Knopf, /vorschlaege",
+  "author": { "name": "Dan Enso" },
+  "types": "./types/index.d.ts"
+}

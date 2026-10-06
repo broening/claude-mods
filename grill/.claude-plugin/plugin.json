@@ -1,0 +1,7 @@
+{
+  "name": "grill",
+  "version": "0.1.0",
+  "description": "Grill-Assistent: mit /grill stellt Claude bis zu 5 Rueckfragen zu deinem Plan, eine pro Schritt als Band ueber dem Eingabefeld, mit Antwortoptionen, KI-Vorschlag und freiem Eingabefeld; am Ende gehen alle Antworten gesammelt an Claude",
+  "author": { "name": "Dan Enso" },
+  "types": "./types/index.d.ts"
+}

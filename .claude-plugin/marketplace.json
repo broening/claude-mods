@@ -1,0 +1,34 @@
+{
+  "name": "claude-mods",
+  "owner": { "name": "Dan Enso" },
+  "metadata": {
+    "description": "Mods fuer Claude Code: Cache-Uhr, Blast Radius, Vorschlaege, Arbeitsliste, Grill"
+  },
+  "plugins": [
+    {
+      "name": "cache-countdown",
+      "source": "./cache-countdown",
+      "description": "Cache-Uhr ueber dem Prompt mit Compact-Knopf und Auto-Compact"
+    },
+    {
+      "name": "blast-radius",
+      "source": "./blast-radius",
+      "description": "Rueckfrage vor gefaehrlichen Shell-Befehlen, mit /ward einschalten"
+    },
+    {
+      "name": "next-steps",
+      "source": "./next-steps",
+      "description": "Drei Vorschlaege fuer den naechsten Schritt nach jeder Antwort"
+    },
+    {
+      "name": "todo-list",
+      "source": "./todo-list",
+      "description": "Arbeitsliste (/todo), die Claude nacheinander abarbeitet"
+    },
+    {
+      "name": "grill",
+      "source": "./grill",
+      "description": "/grill stellt bis zu 5 Rueckfragen zu deinem Plan"
+    }
+  ]
+}
