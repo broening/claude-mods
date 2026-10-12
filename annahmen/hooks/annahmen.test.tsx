@@ -1,4 +1,4 @@
-import { test, expect } from 'claude-code/testing'
+import { test, expect, mock } from 'claude-code/testing'
 import { parseAssumptions, buildCorrection } from './register'
 
 test('zerlegt die Fork-Antwort in Annahmen', () => {
@@ -58,4 +58,46 @@ test('Band: Fork-Annahmen zeigen, falsch markieren, Korrektur senden', async ($,
     expect(await ui.find({ key: 'open' })).toBeUndefined()
     await ui.unmount()
   }
+})
+
+// Ein Ersatz fuer next-steps: an, und beim fertigen Zug schreibt er "shared"
+// so, wie der echte Mod es mit seinem gemeinsamen Fork tut.
+const fakeNextSteps = {
+  name: 'next-steps',
+  register: ((on: any) => {
+    on('session.start', async ($: any, e: any, next: any) => {
+      await $.state.set({ plugin: 'next-steps', key: 'enabled' }, true)
+      return next(e)
+    })
+    on('turn.complete', async ($: any, e: any, next: any) => {
+      const ref = { plugin: 'next-steps', key: 'shared' }
+      await $.state.set(ref, { gen: 1, loading: true, assumptions: [] })
+      await $.state.set(ref, { gen: 1, loading: false, assumptions: ['Aus dem gemeinsamen Fork'] })
+      return next(e)
+    })
+  }) as never,
+}
+
+test('nutzt den Fork von next-steps und fragt nicht selbst', { plugins: [fakeNextSteps] }, async ($, on) => {
+  let ownForks = 0
+  on('model.fork', async () => {
+    ownForks++
+    return { value: { isAnswered: true, text: 'Eigene Annahme', usage: { input_tokens: 1, output_tokens: 1 } } } as never
+  })
+  on('ui.render', async ($r, e) => {
+    const { Box } = $r.ui.resolve(e)
+    return <Box key="engine" />
+  })
+  on('turn.complete', async () => ({ text: '' }))
+  on('session.start', async (_$, e) => ({ ...e, cwd: '/' }) as never)
+  on('command.register', async () => ({ value: undefined }) as never)
+  mock.store(on)
+  await $.session.start({ source: 'startup', cwd: '/' } as never)
+  await $.turn.complete({ reason: 'answer', answer: 'x', durationMs: 1, isAborted: false, turnId: 't1' })
+  const ui = await $.ui.mount({ plugin: 'annahmen', surface: 'terminal', component: 'AbovePrompt', props: {} as never })
+  expect(ownForks).toBe(0)
+  expect(await ui.find({ type: 'Text', text: /1 Annahme/ })).toBeDefined()
+  await ui.press({ key: 'open' })
+  expect(await ui.find({ type: 'Text', text: /gemeinsamen Fork/ })).toBeDefined()
+  await ui.unmount()
 })

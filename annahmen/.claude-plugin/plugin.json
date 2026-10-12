@@ -1,7 +1,8 @@
 {
   "name": "annahmen",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Zeigt nach jeder Antwort die stillen Annahmen von Claude (Band ueber dem Eingabefeld); richtig/falsch markieren, falsche gehen als Korrektur an Claude. /annahmen an/aus",
   "author": { "name": "Dan Enso" },
+  "dependencies": ["next-steps"],
   "types": "./types/index.d.ts"
 }

@@ -12,6 +12,7 @@ declare module 'claude-code' {
       loading: boolean
       enabled: boolean
       note: string
+      pending: number
     }
   }
 }

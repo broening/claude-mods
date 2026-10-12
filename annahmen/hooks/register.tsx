@@ -9,6 +9,11 @@ import type { Assumption, Mark } from '../types'
 // oder falsch. "Korrektur senden" schickt die falschen (plus Notiz) als neuen
 // Auftrag an Claude. Ein Fork erzeugt keinen neuen Zug, also keine Schleife.
 // Mit "/annahmen" an/aus.
+//
+// Ist next-steps an, fragt annahmen NICHT selbst: next-steps holt Schritte und
+// Annahmen mit einem einzigen Fork und legt die Annahmen in "next-steps.shared".
+// annahmen hoert auf diese Schreibvorgaenge (state.set-Hook) und uebernimmt die
+// Liste. Ist next-steps aus oder nicht geladen, fragt annahmen selbst.
 
 const GREEN = '#22c55e'
 const RED = '#ef4444'
@@ -33,6 +38,11 @@ const expanded = atom({ plugin: 'annahmen', key: 'expanded' } as const, false)
 const loading = atom({ plugin: 'annahmen', key: 'loading' } as const, false)
 const enabled = atom({ plugin: 'annahmen', key: 'enabled' } as const, true)
 const note = atom({ plugin: 'annahmen', key: 'note' } as const, '')
+// Auf welche next-steps-Erzeugung (gen) warten wir gerade? -1 = auf keine.
+const pending = atom({ plugin: 'annahmen', key: 'pending' } as const, -1)
+
+const nextStepsEnabled = { plugin: 'next-steps', key: 'enabled' } as const
+const nextStepsShared = { plugin: 'next-steps', key: 'shared' } as const
 
 // Zaehler, damit eine alte, langsame Antwort eine neuere nicht ueberschreibt.
 let generation = 0
@@ -79,6 +89,7 @@ export function buildCorrection(list: Assumption[], extra: string): string {
 
 async function clear($: EngineInterface) {
   generation++
+  await update($, pending, () => -1)
   await update($, items, () => [])
   await update($, expanded, () => false)
   await update($, loading, () => false)
@@ -106,6 +117,38 @@ async function generate($: EngineInterface) {
   if (mine !== generation) return
   await update($, items, () => found.map(text => ({ text, mark: 'offen' as Mark })))
   await update($, loading, () => false)
+}
+
+// next-steps hat "shared" geschrieben: Start (loading) merken, fertige Liste
+// der gemerkten Erzeugung uebernehmen. Alles andere (alte gen, nach "weg" oder
+// neuem Prompt) bleibt liegen.
+async function adopt(
+  $: EngineInterface,
+  value: { gen: number; loading: boolean; assumptions: string[] },
+) {
+  if (!(await read($, enabled))) return
+  if (value.loading) {
+    generation++ // eigener Fork, falls einer laeuft, zaehlt nicht mehr
+    await update($, pending, () => value.gen)
+    await update($, loading, () => true)
+    await update($, items, () => [])
+    await update($, expanded, () => false)
+    return
+  }
+  if ((await read($, pending)) !== value.gen) return
+  await update($, pending, () => -1)
+  await update($, items, () => value.assumptions.map(text => ({ text, mark: 'offen' as Mark })))
+  await update($, loading, () => false)
+}
+
+// Laeuft next-steps (und holt die Annahmen mit)?
+async function sharedFork($: EngineInterface): Promise<boolean> {
+  try {
+    const { value } = await $.state.get(nextStepsEnabled)
+    return value === true
+  } catch {
+    return false
+  }
 }
 
 async function setMark($: EngineInterface, index: number, mark: Mark) {
@@ -157,9 +200,19 @@ export const register: Register = on => {
   on('turn.complete', async ($, e, next) => {
     if (e.agentId || e.reason !== 'answer') return next(e)
     if (!(await read($, enabled))) return next(e)
-    void generate($)
+    if (!(await sharedFork($))) void generate($)
 
     return next(e)
+  })
+
+  // next-steps schreibt seine Fork-Ergebnisse: Annahmen daraus uebernehmen.
+  on('state.set', nextStepsShared, async ($, e, next) => {
+    const r = await next(e)
+    // Hooks auf einem $-Aufruf sehen die Antwort als { value }, sonst direkt.
+    const res = r as unknown as { isSet?: boolean; value?: { isSet?: boolean } }
+    if (res.value?.isSet ?? res.isSet) await adopt($, e.value)
+
+    return r
   })
 
   // Nur EIN Band ueber dem Prompt: darunterliegendes Band durchreichen, unseres

@@ -4,6 +4,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/). Jeder Mod 
 
 ## 2026-10-12
 
+### next-steps 0.2.0, annahmen 0.2.0
+- Eine Modell-Anfrage statt zwei: next-steps holt nach jeder Antwort Schritte **und** Annahmen mit einem Fork. Spart Tokens.
+- annahmen übernimmt die Annahmen von next-steps. Ist next-steps aus (`/vorschlaege`) oder nicht installiert, fragt annahmen selbst.
+- annahmen braucht jetzt next-steps (`dependencies`).
+- Tests für beide Mods.
+
 ### annahmen 0.1.0 (neu)
 - Band über dem Prompt mit den stillen Annahmen von Claude nach jeder Antwort.
 - Je Annahme **richtig** / **falsch**, optionale Notiz, **Korrektur senden** schickt einen neuen Auftrag.

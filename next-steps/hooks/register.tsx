@@ -7,19 +7,32 @@ import type { EngineInterface, Register } from 'claude-code'
 // der wahrscheinlichste und gruen, 2 und 3 sind Alternativen. Ein Klick schickt
 // den Schritt als naechsten Prompt. Ein Fork erzeugt keinen neuen Zug, die
 // Erzeugung laeuft also nie in einer Schleife. Mit "/vorschlaege" an/aus.
+//
+// Derselbe Fork liefert auch die stillen Annahmen fuer den Mod "annahmen"
+// (eine Anfrage statt zwei, spart Tokens). Sie liegen in "shared"; nur
+// next-steps schreibt dort, annahmen liest. Ist next-steps aus, fragt annahmen
+// selbst.
 
 const GREEN = '#22c55e'
 const MAX_STEPS = 3
-const MAX_LEN = 160 // volle Laenge beim Abschicken
+const MAX_ASSUMPTIONS = 6
+const MAX_LEN = 200 // volle Laenge beim Abschicken
 const BAND_LEN = 72 // gekuerzt fuer die Anzeige im schmalen Band
 
 const FORK_PROMPT = [
-  'Nenne genau 3 realistische naechste Schritte, um diese Arbeit fortzusetzen.',
-  'Der wahrscheinlichste Schritt kommt zuerst, dann die Alternativen.',
+  'Antworte in genau zwei Abschnitten und nutze keine Werkzeuge.',
+  'Abschnitt 1 beginnt mit der Zeile SCHRITTE: Darunter genau 3 realistische',
+  'naechste Schritte, um diese Arbeit fortzusetzen, der wahrscheinlichste zuerst.',
   'Jeder Schritt ist eine kurze Anweisung im Imperativ, die ein Entwickler als',
   'Naechstes an dich schicken koennte (eine Zeile, hoechstens etwa 100 Zeichen).',
-  'Antworte NUR mit diesen 3 Zeilen: eine Zeile pro Schritt, ohne Nummerierung,',
-  'ohne Aufzaehlungszeichen, ohne Einleitung, ohne Erklaerung, ohne Werkzeuge.',
+  'Abschnitt 2 beginnt mit der Zeile ANNAHMEN: Darunter die Annahmen, die du in',
+  'deiner letzten Antwort und der Arbeit dafuer STILL getroffen hast: kleine',
+  'Entscheidungen, die der Nutzer nicht ausdruecklich vorgegeben hat (z.B. Namen,',
+  'Orte, Standardwerte, Reihenfolge, was weggelassen wurde, wie etwas gemeint war).',
+  'Nur solche, die falsch sein koennten und die der Nutzer pruefen sollte.',
+  `Hoechstens ${MAX_ASSUMPTIONS}, je ein kurzer deutscher Satz in einer Zeile`,
+  '(hoechstens etwa 120 Zeichen). Gibt es keine, schreibe darunter nur KEINE.',
+  'Keine Nummerierung, keine Aufzaehlungszeichen, keine Einleitung, keine Erklaerung.',
 ].join(' ')
 
 // Aktuelle Vorschlaege. Nur pro Sitzung.
@@ -31,6 +44,12 @@ const suggestions = atom(
 const loading = atom({ plugin: 'next-steps', key: 'loading' } as const, false)
 // Automatisch Vorschlaege machen? Wird gespeichert.
 const enabled = atom({ plugin: 'next-steps', key: 'enabled' } as const, true)
+// Fuer den Mod "annahmen": Annahmen aus demselben Fork. gen zaehlt jede neue
+// Erzeugung hoch, damit annahmen weiss, wann eine neue Liste da ist.
+const shared = atom(
+  { plugin: 'next-steps', key: 'shared' } as const,
+  { gen: 0, loading: false, assumptions: [] as string[] },
+)
 
 // Zaehler, damit eine alte, langsame Antwort eine neuere nicht ueberschreibt.
 let generation = 0
@@ -40,34 +59,62 @@ function cut(text: string): string {
   return text.length > BAND_LEN ? text.slice(0, BAND_LEN - 3) + '...' : text
 }
 
-// Antwort des Forks in bis zu 3 kurze Zeilen zerlegen: Nummern, Spiegelstriche
-// und Aufzaehlungszeichen vorne weg, leere Zeilen raus, Doppelte raus.
-function parseSteps(text: string): string[] {
+// Zeilen zerlegen: Nummern, Spiegelstriche und Aufzaehlungszeichen vorne weg,
+// leere und doppelte Zeilen raus, hoechstens max Zeilen. "KEINE" = nichts.
+function parseLines(lines: string[], max: number): string[] {
   const out: string[] = []
-  for (const line of text.split(/\r?\n/)) {
+  for (const line of lines) {
     const clean = line
       .replace(/^\s*(?:[-*•–—]+|\d+\s*[.):])\s*/, '')
+      .replace(/^annahme\s*\d*\s*:\s*/i, '')
       .replace(/^[`"']+|[`"']+$/g, '')
       .trim()
-    if (!clean || out.includes(clean)) continue
+    if (!clean || /^keine\.?$/i.test(clean) || out.includes(clean)) continue
     out.push(clean.length > MAX_LEN ? clean.slice(0, MAX_LEN - 3) + '...' : clean)
-    if (out.length >= MAX_STEPS) break
+    if (out.length >= max) break
   }
 
   return out
 }
 
-// Vorschlaege erzeugen: Fork starten, Antwort zerlegen, ablegen.
+// Fork-Antwort in die Abschnitte SCHRITTE und ANNAHMEN teilen. Fehlen die
+// Ueberschriften, gilt alles als Schritte.
+export function parseFork(text: string): { steps: string[]; assumptions: string[] } {
+  const steps: string[] = []
+  const assumptions: string[] = []
+  let target = steps
+  for (const line of text.split(/\r?\n/)) {
+    const head = line.replace(/[*#_`]/g, '').trim()
+    if (/^schritte\s*:?$/i.test(head)) {
+      target = steps
+      continue
+    }
+    if (/^annahmen\s*:?$/i.test(head)) {
+      target = assumptions
+      continue
+    }
+    target.push(line)
+  }
+
+  return {
+    steps: parseLines(steps, MAX_STEPS),
+    assumptions: parseLines(assumptions, MAX_ASSUMPTIONS),
+  }
+}
+
+// Vorschlaege (und Annahmen fuer "annahmen") erzeugen: ein Fork, zwei Listen.
 async function generate($: EngineInterface) {
   const mine = ++generation
   await update($, loading, () => true)
   await update($, suggestions, () => [])
+  await update($, shared, s => ({ gen: s.gen + 1, loading: true, assumptions: [] }))
 
   let steps: string[] = []
+  let assumptions: string[] = []
   try {
     const r = await $.model.fork({ prompt: FORK_PROMPT })
     if (r.isAnswered) {
-      steps = parseSteps(r.text)
+      ;({ steps, assumptions } = parseFork(r.text))
     } else if (r.reason === 'api-error') {
       $.ui.toast('Vorschlaege: Fehler bei der Anfrage.')
     }
@@ -78,6 +125,7 @@ async function generate($: EngineInterface) {
   if (mine !== generation) return
   await update($, suggestions, () => steps)
   await update($, loading, () => false)
+  await update($, shared, s => ({ ...s, loading: false, assumptions }))
 }
 
 // Ein/Aus umschalten: Atom und Store zusammen.
@@ -90,6 +138,7 @@ async function toggleEnabled($: EngineInterface) {
     generation++
     await update($, loading, () => false)
     await update($, suggestions, () => [])
+    await update($, shared, x => ({ ...x, loading: false }))
   }
 }
 
@@ -98,6 +147,7 @@ async function pick($: EngineInterface, text: string) {
   generation++
   await update($, suggestions, () => [])
   await update($, loading, () => false)
+  await update($, shared, x => ({ ...x, loading: false }))
   await $.prompt.submit({ text, asUser: true })
 }
 

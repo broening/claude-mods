@@ -4,6 +4,7 @@ declare module 'claude-code' {
       suggestions: string[]
       loading: boolean
       enabled: boolean
+      shared: { gen: number; loading: boolean; assumptions: string[] }
     }
   }
 }

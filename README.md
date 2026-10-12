@@ -15,7 +15,7 @@ Mods für [Claude Code](https://claude.com/claude-code). Jeder Mod ist ein klein
 | [annahmen](annahmen) | Zeigt nach jeder Antwort die Annahmen, die Claude still getroffen hat. Du markierst sie als richtig oder falsch. **Korrektur senden** schickt die falschen als neuen Auftrag. | `/annahmen` an/aus |
 | [grill](grill) | Stellt bis zu 5 Rückfragen zu deinem Plan, eine nach der anderen, mit Antwortknöpfen und KI-Vorschlag. | `/grill [thema]` |
 
-Hinweis: next-steps, annahmen und grill rufen das Modell zusätzlich auf (`$.model.fork`). Das kostet etwas Kontingent.
+Hinweis: next-steps, annahmen und grill rufen das Modell zusätzlich auf (`$.model.fork`). Das kostet etwas Kontingent. next-steps und annahmen teilen sich eine Anfrage pro Antwort; annahmen braucht dafür next-steps.
 
 ## Voraussetzungen
 
