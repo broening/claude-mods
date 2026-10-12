@@ -1,0 +1,7 @@
+{
+  "name": "prompt-boost",
+  "version": "0.1.0",
+  "description": "Knopf ueber dem Eingabefeld: schreibt den Prompt-Entwurf besser um (passende Skills, offene Entscheidungen, Zielbild), ersetzt nur den Entwurf, sendet nicht. Rueckgaengig moeglich",
+  "author": { "name": "Dan Enso" },
+  "types": "./types/index.d.ts"
+}

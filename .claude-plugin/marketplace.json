@@ -4,7 +4,7 @@
     "name": "Dan Enso"
   },
   "metadata": {
-    "description": "Mods fuer Claude Code: Cache-Uhr, Blast Radius, Vorschlaege, Arbeitsliste, Annahmen, Grill"
+    "description": "Mods fuer Claude Code: Cache-Uhr, Blast Radius, Vorschlaege, Arbeitsliste, Annahmen, Prompt verbessern, Grill"
   },
   "plugins": [
     {
@@ -31,6 +31,11 @@
       "name": "annahmen",
       "source": "./annahmen",
       "description": "Zeigt Claudes stille Annahmen nach jeder Antwort; falsche gehen als Korrektur zurueck"
+    },
+    {
+      "name": "prompt-boost",
+      "source": "./prompt-boost",
+      "description": "Knopf ueber dem Prompt: Entwurf besser umschreiben, ohne zu senden"
     },
     {
       "name": "grill",

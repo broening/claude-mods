@@ -4,6 +4,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/). Jeder Mod 
 
 ## 2026-10-12
 
+### prompt-boost 0.1.0 (neu)
+- Band über dem Eingabefeld mit **Prompt verbessern**: schreibt den Entwurf besser um und ersetzt ihn im Eingabefeld. Sendet nichts.
+- **rueckgaengig** holt den alten Entwurf zurück. Tippt man währenddessen weiter, wird nichts ersetzt.
+- `/verbessern` schaltet den Mod an oder aus (wird gespeichert).
+
 ### next-steps 0.2.0, annahmen 0.2.0
 - Eine Modell-Anfrage statt zwei: next-steps holt nach jeder Antwort Schritte **und** Annahmen mit einem Fork. Spart Tokens.
 - annahmen übernimmt die Annahmen von next-steps. Ist next-steps aus (`/vorschlaege`) oder nicht installiert, fragt annahmen selbst.
