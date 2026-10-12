@@ -2,6 +2,13 @@
 
 Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/). Jeder Mod hat seine eigene Version in `plugin.json`.
 
+## 2026-10-12
+
+### annahmen 0.1.0 (neu)
+- Band über dem Prompt mit den stillen Annahmen von Claude nach jeder Antwort.
+- Je Annahme **richtig** / **falsch**, optionale Notiz, **Korrektur senden** schickt einen neuen Auftrag.
+- `/annahmen` schaltet den Mod an oder aus (wird gespeichert).
+
 ## 2026-10-06
 
 ### cache-countdown 0.2.0

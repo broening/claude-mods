@@ -12,9 +12,10 @@ Mods für [Claude Code](https://claude.com/claude-code). Jeder Mod ist ein klein
 | [blast-radius](blast-radius) | Hält gefährliche Shell-Befehle (Bash und PowerShell) an, zum Beispiel `rm -rf`, `Remove-Item -Recurse`, `git reset --hard`, `git push --force`, `DROP TABLE`. Fragt vor dem Ausführen nach. Standard aus. | `/ward` an/aus |
 | [next-steps](next-steps) | Schlägt nach jeder Antwort drei nächste Schritte vor. Ein Klick schickt den Schritt als Prompt. | `/vorschlaege` |
 | [todo-list](todo-list) | Arbeitsliste im Seitenfenster. Aufgaben einreihen, ohne Claude zu unterbrechen. Mit **Auto** arbeitet Claude sie nacheinander ab. | `/todo` |
+| [annahmen](annahmen) | Zeigt nach jeder Antwort die Annahmen, die Claude still getroffen hat. Du markierst sie als richtig oder falsch. **Korrektur senden** schickt die falschen als neuen Auftrag. | `/annahmen` an/aus |
 | [grill](grill) | Stellt bis zu 5 Rückfragen zu deinem Plan, eine nach der anderen, mit Antwortknöpfen und KI-Vorschlag. | `/grill [thema]` |
 
-Hinweis: next-steps und grill rufen das Modell zusätzlich auf (`$.model.fork`). Das kostet etwas Kontingent.
+Hinweis: next-steps, annahmen und grill rufen das Modell zusätzlich auf (`$.model.fork`). Das kostet etwas Kontingent.
 
 ## Voraussetzungen
 
