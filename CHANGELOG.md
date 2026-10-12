@@ -4,6 +4,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/). Jeder Mod 
 
 ## 2026-10-12
 
+### sitzungs-waechter 0.1.0 (neu)
+- Warnt mit einem Band über dem Prompt (und einmal als Toast), wenn eine zweite Sitzung im selben Ordner läuft.
+- Jede Sitzung trägt sich alle 30 Sekunden in `~/.claude/sitzungs-waechter.json` ein. Ohne Lebenszeichen seit 90 Sekunden gilt sie als beendet.
+- **ok** blendet die Warnung aus, bis eine weitere Sitzung dazukommt.
+
 ### prompt-boost 0.1.0 (neu)
 - Band über dem Eingabefeld mit **Prompt verbessern**: schreibt den Entwurf besser um und ersetzt ihn im Eingabefeld. Sendet nichts.
 - **rueckgaengig** holt den alten Entwurf zurück. Tippt man währenddessen weiter, wird nichts ersetzt.

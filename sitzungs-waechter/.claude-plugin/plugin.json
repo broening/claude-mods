@@ -1,0 +1,6 @@
+{
+  "name": "sitzungs-waechter",
+  "version": "0.1.0",
+  "description": "Warnt mit einem Band ueber dem Prompt, wenn eine zweite Claude-Code-Sitzung im selben Ordner laeuft.",
+  "types": "./types/index.d.ts"
+}

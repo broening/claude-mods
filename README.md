@@ -14,6 +14,7 @@ Mods für [Claude Code](https://claude.com/claude-code). Jeder Mod ist ein klein
 | [todo-list](todo-list) | Arbeitsliste im Seitenfenster. Aufgaben einreihen, ohne Claude zu unterbrechen. Mit **Auto** arbeitet Claude sie nacheinander ab. | `/todo` |
 | [annahmen](annahmen) | Zeigt nach jeder Antwort die Annahmen, die Claude still getroffen hat. Du markierst sie als richtig oder falsch. **Korrektur senden** schickt die falschen als neuen Auftrag. | `/annahmen` an/aus |
 | [prompt-boost](prompt-boost) | Knopf **Prompt verbessern** über dem Eingabefeld. Schreibt deinen Entwurf besser um (passende Skills, offene Fragen, Zielbild). Ersetzt nur den Entwurf, sendet nichts. **rueckgaengig** holt den alten Text zurück. | `/verbessern` an/aus |
+| [sitzungs-waechter](sitzungs-waechter) | Warnt über dem Prompt, wenn eine zweite Claude-Code-Sitzung im selben Ordner läuft. Dann können sich Dateien überschreiben. **ok** blendet die Warnung aus. | – |
 | [grill](grill) | Stellt bis zu 5 Rückfragen zu deinem Plan, eine nach der anderen, mit Antwortknöpfen und KI-Vorschlag. | `/grill [thema]` |
 
 Hinweis: next-steps, annahmen, prompt-boost und grill rufen das Modell zusätzlich auf (`$.model.fork`). Das kostet etwas Kontingent. next-steps und annahmen teilen sich eine Anfrage pro Antwort; annahmen braucht dafür next-steps.

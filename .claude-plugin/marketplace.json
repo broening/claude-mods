@@ -38,6 +38,11 @@
       "description": "Knopf ueber dem Prompt: Entwurf besser umschreiben, ohne zu senden"
     },
     {
+      "name": "sitzungs-waechter",
+      "source": "./sitzungs-waechter",
+      "description": "Warnt, wenn eine zweite Sitzung im selben Ordner laeuft"
+    },
+    {
       "name": "grill",
       "source": "./grill",
       "description": "/grill stellt bis zu 5 Rueckfragen zu deinem Plan"
